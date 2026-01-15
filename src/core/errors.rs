@@ -82,11 +82,31 @@ pub enum TranslationError {
     /// YAML error
     #[error("YAML error: {0}")]
     YamlError(#[from] serde_yaml::Error),
+
+    /// ePub document error
+    #[error("ePub document error: {0}")]
+    EpubError(String),
+
+    /// Zip file error
+    #[error("Zip file error: {0}")]
+    ZipError(String),
 }
 
 impl From<anyhow::Error> for TranslationError {
     fn from(err: anyhow::Error) -> Self {
         TranslationError::InternalError(err.to_string())
+    }
+}
+
+impl From<epub::doc::DocError> for TranslationError {
+    fn from(err: epub::doc::DocError) -> Self {
+        TranslationError::EpubError(err.to_string())
+    }
+}
+
+impl From<zip::result::ZipError> for TranslationError {
+    fn from(err: zip::result::ZipError) -> Self {
+        TranslationError::ZipError(err.to_string())
     }
 }
 

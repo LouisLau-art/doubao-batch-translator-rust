@@ -246,23 +246,46 @@ impl AsyncTranslator {
                     message: e.to_string(),
                 })?;
 
-            // Parse response
-            let translation = json["output"]["choices"]
-                .get(0)
-                .and_then(|c| c["message"]["content"].as_str())
-                .ok_or_else(|| TranslationError::InvalidResponseError {
-                    message: "No translation in response".to_string(),
-                })?
-                .to_string();
+            // Parse response - support both OpenAI-style and Doubao-style formats
+            let translation = if let Some(choices) = json["output"]["choices"].as_array() {
+                // OpenAI-style format: {"output": {"choices": [{"message": {"content": "..."}}]}}
+                choices
+                    .get(0)
+                    .and_then(|c| c["message"]["content"].as_str())
+            } else if let Some(output) = json["output"].as_array() {
+                // Doubao-style format: {"output": [{"content": [{"text": "..."}]}]}
+                output
+                    .get(0)
+                    .and_then(|o| o["content"].as_array())
+                    .and_then(|content| content.get(0))
+                    .and_then(|c| c["text"].as_str())
+            } else {
+                None
+            }
+            .ok_or_else(|| TranslationError::InvalidResponseError {
+                message: "No translation in response".to_string(),
+            })?
+            .to_string();
 
             let tokens_used = json["usage"]["total_tokens"]
                 .as_u64()
                 .unwrap_or(0) as usize;
 
-            let detected_source_lang = json["output"]["choices"]
-                .get(0)
-                .and_then(|c| c["message"]["detected_source_language"].as_str())
-                .map(|s| s.to_string());
+            // Parse detected source language - support both formats
+            let detected_source_lang = if let Some(choices) = json["output"]["choices"].as_array() {
+                // OpenAI-style format
+                choices
+                    .get(0)
+                    .and_then(|c| c["message"]["detected_source_language"].as_str())
+            } else if let Some(output) = json["output"].as_array() {
+                // Doubao-style format - check if detected source language is present
+                output
+                    .get(0)
+                    .and_then(|o| o["detected_source_language"].as_str())
+            } else {
+                None
+            }
+            .map(|s| s.to_string());
 
             let request_id = json["id"].as_str().map(|s| s.to_string());
 

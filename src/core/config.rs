@@ -45,6 +45,8 @@ const DEFAULT_MODELS: &[(&str, LaneType, u32, usize)] = &[
     ("deepseek-v3-250324", LaneType::Fast, 30000, 500),
     ("doubao-seed-1-6-251015", LaneType::Fast, 30000, 500),
     ("doubao-1-5-vision-pro-32k-250115", LaneType::Fast, 30000, 500),
+    // ModelScope models
+    ("deepseek-ai/DeepSeek-V3.2", LaneType::Fast, 30000, 500),
 ];
 
 impl TranslatorConfig {

@@ -447,7 +447,7 @@ Check out [this link](https://example.com) for more info."#;
     #[test]
     fn test_is_markdown_file() {
         let processor = MarkdownProcessor::new(
-            AsyncTranslator::new(crate::core::models::TranslatorConfig::default()).unwrap(),
+            AsyncTranslator::new(crate::core::config::TranslatorConfig::default()).unwrap(),
         );
 
         assert!(processor.is_markdown_file(Path::new("test.md")));
