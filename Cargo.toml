@@ -44,6 +44,8 @@ config = "0.13"
 dotenvy = "0.15"
 anyhow = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1.0"
+walkdir = "2.4"
 
 # 日志
 tracing = "0.1"
